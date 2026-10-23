@@ -1,5 +1,53 @@
 [
   {
+    "id": "amoy",
+    "name": "Amoy",
+    "role": "Product & Brand Designer",
+    "department": "Design",
+    "systemPrompt": "Kamu adalah Amoy, desainer produk dan brand di Kantor AI. Kamu bertanggung jawab menyusun fondasi desain brand, merancang identitas visual, estetika antarmuka, dan library komponen UI. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
+    "status": "kerja",
+    "task": "Fondasi desain brand",
+    "zone": "open_workspace",
+    "isUser": false,
+    "avatarColor": "#ec4899",
+    "x": 755,
+    "y": 275,
+    "chillSpot": {
+      "x": 520,
+      "y": 370,
+      "zone": "lounge"
+    },
+    "recentActivity": [
+      "Eksplorasi palet warna dark navy neo-isometric",
+      "Membuat icon set 24px untuk dashboard",
+      "Menyusun pedoman identitas brand"
+    ]
+  },
+  {
+    "id": "bobby",
+    "name": "Bobby",
+    "role": "Autonomous Business Builder",
+    "department": "Core Tech",
+    "systemPrompt": "Kamu adalah Bobby, System Builder di Kantor AI. Kamu bertugas melengkapi data bisnis, mengonfigurasi kredensial sistem, dan membangun integrasi infrastruktur bisnis mandiri. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
+    "status": "nunggu",
+    "task": "Lengkapi data bisnis",
+    "zone": "open_workspace",
+    "isUser": false,
+    "avatarColor": "#fbbf24",
+    "x": 655,
+    "y": 235,
+    "chillSpot": {
+      "x": 630,
+      "y": 590,
+      "zone": "lounge"
+    },
+    "recentActivity": [
+      "Scaffolding microservice data ingestion",
+      "Unit testing edge routing bisnis",
+      "Menunggu data bisnis & kredensial API"
+    ]
+  },
+  {
     "id": "elfano",
     "name": "Elfano (kamu)",
     "role": "Founder & CEO",
@@ -15,84 +63,12 @@
     "chillSpot": {
       "x": 310,
       "y": 175,
-      "zone": "boss_room"
+      "zone": "lounge"
     },
     "recentActivity": [
       "Meninjau roadmap strategis Q4",
       "Mengevaluasi performa operasional tim",
       "Sedang istirahat menikmati kopi espresso"
-    ]
-  },
-  {
-    "id": "pompom",
-    "name": "Pompom",
-    "role": "Finance & Operation Specialist",
-    "department": "Finance",
-    "systemPrompt": "Kamu adalah Pompom, spesialis keuangan dan operasional di Kantor AI. Tugasmu adalah mencatat nota, merekap mutasi kas operasional, menyiapkan invoice vendor, dan memastikan akurasi pembukuan kas. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
-    "status": "nunggu",
-    "task": "Catat nota & mutasi ke...",
-    "zone": "meeting_room",
-    "isUser": false,
-    "avatarColor": "#f59e0b",
-    "x": 485,
-    "y": 195,
-    "chillSpot": {
-      "x": 705,
-      "y": 510,
-      "zone": "cafe"
-    },
-    "recentActivity": [
-      "Merekap pengeluaran server cloud bulan ini",
-      "Menyiapkan invoice vendor payment gateway",
-      "Menunggu persetujuan Elfano untuk pencatatan nota"
-    ]
-  },
-  {
-    "id": "zekky",
-    "name": "Zekky",
-    "role": "Lead Architect & AI Researcher",
-    "department": "Engineering",
-    "systemPrompt": "Kamu adalah Zekky, Lead Architect dan periset AI di Kantor AI. Kamu berfokus pada riset arsitektur pipeline multi-agent, memimpin technical meeting, dan mengoptimalkan performa model inference. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
-    "status": "kerja",
-    "task": "Riset arsitektur & meeting",
-    "zone": "meeting_room",
-    "isUser": false,
-    "avatarColor": "#10b981",
-    "x": 545,
-    "y": 155,
-    "chillSpot": {
-      "x": 245,
-      "y": 375,
-      "zone": "game_room"
-    },
-    "recentActivity": [
-      "Memimpin technical meeting arsitektur pipeline",
-      "Riset benchmark model inference latency",
-      "Optimasi memory throughput WebSocket"
-    ]
-  },
-  {
-    "id": "bobby",
-    "name": "Bobby",
-    "role": "Autonomous Business Builder",
-    "department": "Core Tech",
-    "systemPrompt": "Kamu adalah Bobby, System Builder di Kantor AI. Kamu bertugas melengkapi data bisnis, mengonfigurasi kredensial sistem, dan membangun integrasi infrastruktur bisnis mandiri. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
-    "status": "nunggu",
-    "task": "Lengkapi data bisnis",
-    "zone": "builder_room",
-    "isUser": false,
-    "avatarColor": "#fbbf24",
-    "x": 655,
-    "y": 235,
-    "chillSpot": {
-      "x": 630,
-      "y": 590,
-      "zone": "cafe"
-    },
-    "recentActivity": [
-      "Scaffolding microservice data ingestion",
-      "Unit testing edge routing bisnis",
-      "Menunggu data bisnis & kredensial API"
     ]
   },
   {
@@ -102,7 +78,8 @@
     "department": "Growth",
     "systemPrompt": "Kamu adalah Jojo, pakar growth marketing dan analitik performa di Kantor AI. Tugasmu adalah menganalisis funnel konversi, mengevaluasi campaign berbayar, dan menyusun laporan iklan mingguan secara detail. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
     "status": "kerja",
-    "task": "Laporan iklan mingguan",
+    "task": "Menjalankan draf yang disetujui: Ringkas laporan iklan: Insta...",
+    "draft": "Halo Bos Elfano, Jojo di sini. \n\nBerikut adalah laporan performa *campaign* Instagram kita untuk minggu ini berdasarkan data yang masuk. Saya sudah susun secara padat dan *actionable* agar kita bisa langsung ambil keputusan.\n\n---\n\n### 📊 1. Ringkasan Kinerja Utama (Performance Summary)\n*   **Total Biaya (Spend):** Rp500.000\n*   **Jangkauan (Reach):** 12.000 akun\n*   **Klik (Link Clicks):** 85 klik\n*   **Pesanan (Conversions/Orders):** 3 pesanan\n*   **Click-Through Rate (CTR):** 0,71% *(85 klik / 12.000 jangkauan)*\n*   **Cost Per Click (CPC):** Rp5.882 *(Rp500.000 / 85 klik)*\n*   **Cost Per Acquisition (CPA / Cost per Order):** Rp166.667 *(Rp500.000 / 3 pesanan)*\n\n---\n\n### 📈 2. Analisis Efektivitas\n\n**🔍 Apa yang Bagus (The Positives):**\n*   **Daya Tarik Awal (Creative Hook):** Dengan jangkauan 12.000 dan menghasilkan 85 klik, visual/pesan iklan kita di *feed/story* cukup menarik perhatian audiens untuk diklik (walaupun CTR masih bisa dioptimalkan).\n\n**⚠️ Apa yang Perlu Ditingkatkan (The Bottlenecks):**\n*   **Tingkat Konversi Rendah (Conversion Rate):** Dari 85 orang yang klik ke halaman *landing* atau chat, hanya 3 yang jadi beli (Conversion Rate sekitar **3,5%**). Artinya, ada kebocoran di *funnel* kita setelah klik (bisa karena *landing page* yang kurang meyakinkan, penawaran kurang kuat, atau *admin* *chat* yang lambat membalas).\n*   **CPA Cukup Tinggi:** Biaya Rp166.667 untuk mendapatkan 1 pesanan (CPA) tergolong mahal jika margin produk kita tipis. Kita harus menekan angka ini.\n\n---\n\n### 🚀 3. Rekomendasi Langkah Selanjutnya (Action Items)\n\n1.  **Optimasi *Bottom-Funnel* (Halaman Tujuan/Chat):**\n    *   Sebelum menaikkan budget iklan, perbaiki dulu *landing page* atau *script* balasan admin. Kenapa dari 85 orang yang tertarik, 82 orang batal beli? Kita perlu pasang *pixel* atau lacak di mana mereka *drop-off*.\n2.  **A/B Testing Kreatif Iklan (Creative Refresh):**\n    *   Buat 2 variasi *copywriting* atau visual baru minggu depan untuk mendongkrak CTR agar di atas 1%, sehingga kita bisa mendapatkan klik lebih banyak dengan biaya yang sama.\n3.  **Targeting Audience:**\n    *   Evaluasi kembali apakah kita menyasar audiens yang tepat. Persempit *targeting* ke segmen yang memiliki niat beli (*high-intent*) lebih tinggi, bukan hanya yang sekadar \"suka nge-klik\".\n4.  **Alokasi Budget:**\n    *   Pertahankan budget di Rp500.000 untuk 3-4 hari ke depan sambil kita perbaiki *funnel*-nya, baru kita *scale-up* jika *conversion rate* sudah naik minimal ke angka 5-7%.\n\n---\nAda bagian spesifik dari *funnel* ini yang ingin kita bedah lebih dalam, Bos? Kabari saya ya!",
     "zone": "open_workspace",
     "isUser": false,
     "avatarColor": "#10b981",
@@ -111,12 +88,39 @@
     "chillSpot": {
       "x": 755,
       "y": 540,
-      "zone": "cafe"
+      "zone": "lounge"
     },
     "recentActivity": [
+      "Status: KERJA - Menjalankan draf yang disetujui: Ringkas laporan iklan: Insta...",
+      "Draf selesai disusun dengan gemini-3.5-flash-lite. Menunggu persetujuan.",
+      "Mulai mengerjakan tugas: \"Ringkas laporan iklan: Instagram habis Rp500rb, ...\"",
       "A/B testing campaign ads headline",
       "Analisis cohort retensi pengguna baru",
       "Merekap performa ROAS 4.2x minggu ini"
+    ]
+  },
+  {
+    "id": "kunyuk",
+    "name": "Kunyuk",
+    "role": "Social Media & Content Creator",
+    "department": "Creative",
+    "systemPrompt": "Kamu adalah Kunyuk, kreator konten media sosial di Kantor AI. Tugas utamamu adalah memproduksi konten sosmed yang viral, merancang ide postingan kreatif, dan memaksimalkan interaksi audiens. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
+    "status": "kerja",
+    "task": "Konten sosmed",
+    "zone": "open_workspace",
+    "isUser": false,
+    "avatarColor": "#34d399",
+    "x": 705,
+    "y": 295,
+    "chillSpot": {
+      "x": 150,
+      "y": 380,
+      "zone": "lounge"
+    },
+    "recentActivity": [
+      "Membuat script video pendek tren AI",
+      "Merancang carousel tips produktivitas agen",
+      "Menganalisis engagement rate konten sosmed"
     ]
   },
   {
@@ -144,51 +148,55 @@
     ]
   },
   {
-    "id": "kunyuk",
-    "name": "Kunyuk",
-    "role": "Social Media & Content Creator",
-    "department": "Creative",
-    "systemPrompt": "Kamu adalah Kunyuk, kreator konten media sosial di Kantor AI. Tugas utamamu adalah memproduksi konten sosmed yang viral, merancang ide postingan kreatif, dan memaksimalkan interaksi audiens. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
-    "status": "kerja",
-    "task": "Konten sosmed",
+    "id": "pompom",
+    "name": "Pompom",
+    "role": "Finance & Operation Specialist",
+    "department": "Finance",
+    "systemPrompt": "Kamu adalah Pompom, spesialis keuangan dan operasional di Kantor AI. Tugasmu adalah mencatat nota, merekap mutasi kas operasional, menyiapkan invoice vendor, dan memastikan akurasi pembukuan kas. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
+    "status": "nunggu",
+    "task": "Rapikan nota ini jadi tabel: beli kertas 50rb, tinta 120rb, ongkir 25rb.",
+    "draft": "| Keterangan | Jumlah (Rp) |\n| :--- | :--- |\n| Beli kertas | 50.000 |\n| Tinta | 120.000 |\n| Ongkir | 25.000 |\n| **Total** | **195.000** |",
     "zone": "open_workspace",
     "isUser": false,
-    "avatarColor": "#34d399",
-    "x": 705,
-    "y": 295,
+    "avatarColor": "#f59e0b",
+    "x": 485,
+    "y": 195,
     "chillSpot": {
-      "x": 150,
-      "y": 380,
-      "zone": "game_room"
-    },
-    "recentActivity": [
-      "Membuat script video pendek tren AI",
-      "Merancang carousel tips produktivitas agen",
-      "Menganalisis engagement rate konten sosmed"
-    ]
-  },
-  {
-    "id": "amoy",
-    "name": "Amoy",
-    "role": "Product & Brand Designer",
-    "department": "Design",
-    "systemPrompt": "Kamu adalah Amoy, desainer produk dan brand di Kantor AI. Kamu bertanggung jawab menyusun fondasi desain brand, merancang identitas visual, estetika antarmuka, dan library komponen UI. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
-    "status": "kerja",
-    "task": "Fondasi desain brand",
-    "zone": "open_workspace",
-    "isUser": false,
-    "avatarColor": "#ec4899",
-    "x": 755,
-    "y": 275,
-    "chillSpot": {
-      "x": 520,
-      "y": 370,
+      "x": 705,
+      "y": 510,
       "zone": "lounge"
     },
     "recentActivity": [
-      "Eksplorasi palet warna dark navy neo-isometric",
-      "Membuat icon set 24px untuk dashboard",
-      "Menyusun pedoman identitas brand"
+      "Draf selesai disusun dengan gemini-3.5-flash-lite. Menunggu persetujuan.",
+      "Mulai mengerjakan tugas: \"Rapikan nota ini jadi tabel: beli kertas 50rb, t...\"",
+      "Draf selesai disusun dengan gemini-3.5-flash-lite. Menunggu persetujuan.",
+      "Mulai mengerjakan tugas: \"rapikan nota ini jadi tabel: beli kertas 50rb, t...\"",
+      "Status: KERJA - rapikan nota ini jadi tabel: beli kertas 50rb, tinta 120rb,ongkir 25rb.",
+      "Merekap pengeluaran server cloud bulan ini"
+    ]
+  },
+  {
+    "id": "zekky",
+    "name": "Zekky",
+    "role": "Lead Architect & AI Researcher",
+    "department": "Engineering",
+    "systemPrompt": "Kamu adalah Zekky, Lead Architect dan periset AI di Kantor AI. Kamu berfokus pada riset arsitektur pipeline multi-agent, memimpin technical meeting, dan mengoptimalkan performa model inference. Jawab singkat dan langsung sesuai permintaan. Jangan menambah saran, catatan, atau pertanyaan penutup yang tidak diminta. Jika diminta tabel, berikan tabel markdown saja.",
+    "status": "kerja",
+    "task": "Riset arsitektur & meeting",
+    "zone": "open_workspace",
+    "isUser": false,
+    "avatarColor": "#10b981",
+    "x": 545,
+    "y": 155,
+    "chillSpot": {
+      "x": 245,
+      "y": 375,
+      "zone": "lounge"
+    },
+    "recentActivity": [
+      "Memimpin technical meeting arsitektur pipeline",
+      "Riset benchmark model inference latency",
+      "Optimasi memory throughput WebSocket"
     ]
   }
 ]

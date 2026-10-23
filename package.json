@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
+    "@libsql/client": "^0.18.0",
     "lucide-react": "^0.454.0",
     "next": "^14.2.15",
     "phaser": "^3.87.0",
@@ -20,7 +20,6 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20.14.0",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^18.3.1",

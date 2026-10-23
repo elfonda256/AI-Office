@@ -1,17 +1,27 @@
 import { NextResponse } from 'next/server';
 import { getAllAgents, updateAgentStatusAndTask } from '@/lib/db';
-import { generateAgentDraft, testGeminiConnection, getGeminiConfig } from '@/lib/gemini';
+import { generateAgentDraft, testGeminiConnection } from '@/lib/gemini';
+import { checkAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Up to 60 seconds allowed on Vercel Serverless
 
 // GET: Test connection to Gemini
 export async function GET() {
+  if (!checkAuth()) {
+    return NextResponse.json({ error: 'Unauthorized: Kantor AI terkunci' }, { status: 401 });
+  }
+
   const testResult = await testGeminiConnection();
   return NextResponse.json(testResult);
 }
 
 // POST: Execute task for an agent using Gemini
 export async function POST(request: Request) {
+  if (!checkAuth()) {
+    return NextResponse.json({ error: 'Unauthorized: Kantor AI terkunci' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { id, task } = body;
@@ -20,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing agent id or task description' }, { status: 400 });
     }
 
-    const agents = getAllAgents();
+    const agents = await getAllAgents();
     const agent = agents.find((a) => a.id === id);
 
     if (!agent) {
@@ -28,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Set status to 'kerja' while Gemini processes
-    updateAgentStatusAndTask(
+    await updateAgentStatusAndTask(
       id,
       'kerja',
       task,
@@ -46,7 +56,7 @@ export async function POST(request: Request) {
 
     if (!result.success) {
       // Revert to 'santai' or previous state with error
-      updateAgentStatusAndTask(
+      await updateAgentStatusAndTask(
         id,
         'santai',
         agent.task,
@@ -57,7 +67,7 @@ export async function POST(request: Request) {
     }
 
     // 3. Set status to 'nunggu' with draft waiting for user approval, preserving original user task
-    updateAgentStatusAndTask(
+    await updateAgentStatusAndTask(
       id,
       'nunggu',
       task,
@@ -65,7 +75,8 @@ export async function POST(request: Request) {
       `Draf selesai disusun dengan ${result.model}. Menunggu persetujuan.`
     );
 
-    const updatedAgent = getAllAgents().find((a) => a.id === id);
+    const updatedAgents = await getAllAgents();
+    const updatedAgent = updatedAgents.find((a) => a.id === id);
 
     return NextResponse.json({
       success: true,

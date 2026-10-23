@@ -12,6 +12,7 @@ import {
   Move,
   Check,
   X,
+  LogOut,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -24,6 +25,8 @@ interface TopBarProps {
   onZoomOut: () => void;
   onResetCamera: () => void;
   onSelectAgent: (agent: Agent) => void;
+  isAuthEnabled?: boolean;
+  onLogout?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -36,6 +39,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   onZoomOut,
   onResetCamera,
   onSelectAgent,
+  isAuthEnabled,
+  onLogout,
 }) => {
   const kerjaCount = agents.filter((a) => a.status === 'kerja').length;
   const nungguCount = agents.filter((a) => a.status === 'nunggu').length;
@@ -406,6 +411,31 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <RotateCcw size={14} />
         </button>
+
+        {isAuthEnabled && onLogout && (
+          <>
+            <div style={{ width: 1, height: 20, background: 'rgba(255, 255, 255, 0.1)', margin: '0 2px' }} />
+            <button
+              onClick={onLogout}
+              title="Kunci Kantor AI & Keluar"
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: 8,
+                color: '#fca5a5',
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

@@ -92,6 +92,7 @@ Instruksi Tugas:
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(50000), // 50s timeout to safely finish before Vercel's 60s limit
       body: JSON.stringify({
         contents: [
           {

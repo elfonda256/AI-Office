@@ -6,10 +6,11 @@ import { Agent, AgentStatus } from '../types/agent';
 import { TopBar } from '../components/TopBar';
 import { AgentDetailDrawer } from '../components/AgentDetailDrawer';
 import { OfficeSceneHandle } from '../components/OfficeScene';
+import { LoginModal } from '../components/LoginModal';
 import initialAgentsData from '../data/agents.json';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 
-// Dynamic import with SSR disabled
+// Dynamic import with SSR disabled for Phaser
 const OfficeScene = dynamic(
   () => import('../components/OfficeScene').then((mod) => mod.OfficeScene),
   { ssr: false }
@@ -22,10 +23,14 @@ export default function KantorAiPage() {
   const [isCalibrating, setIsCalibrating] = useState<boolean>(false);
   const [saveNotification, setSaveNotification] = useState<string | null>(null);
 
+  // Authentication states
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
+  const [isAuthRequired, setIsAuthRequired] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+
   const sceneRef = useRef<OfficeSceneHandle | null>(null);
 
-  // Sync with /api/agents on mount
-  useEffect(() => {
+  const fetchAgents = () => {
     fetch('/api/agents')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -34,6 +39,27 @@ export default function KantorAiPage() {
         }
       })
       .catch((err) => console.log('Using initial agents data', err));
+  };
+
+  // Check auth requirement on mount
+  useEffect(() => {
+    fetch('/api/auth')
+      .then((res) => res.json())
+      .then((data) => {
+        const required = Boolean(data.required);
+        const authed = !required || Boolean(data.authenticated);
+        setIsAuthRequired(required);
+        setIsAuthenticated(authed);
+        setAuthChecked(true);
+
+        if (authed) {
+          fetchAgents();
+        }
+      })
+      .catch(() => {
+        setAuthChecked(true);
+        fetchAgents();
+      });
   }, []);
 
   // Update selected agent if list changes
@@ -44,8 +70,16 @@ export default function KantorAiPage() {
     }
   }, [agents, selectedAgent]);
 
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' });
+    } catch {}
+    setIsAuthenticated(false);
+  };
+
   // Handle status update
-  const handleUpdateStatus = async (agentId: string, newStatus: AgentStatus, newTask?: string) => {
+  const handleUpdateStatus = async (agentId: string, newStatus: AgentStatus, newTask?: string, newDraft?: string) => {
     // 1. Optimistic UI update
     setAgents((prev) =>
       prev.map((a) => {
@@ -54,6 +88,7 @@ export default function KantorAiPage() {
             ...a,
             status: newStatus,
             task: newTask || a.task,
+            draft: newDraft !== undefined ? newDraft : a.draft,
             recentActivity: [
               `Status diubah ke ${newStatus.toUpperCase()}: ${newTask || a.task}`,
               ...a.recentActivity.slice(0, 4),
@@ -69,12 +104,12 @@ export default function KantorAiPage() {
       sceneRef.current.updateAgentStatus(agentId, newStatus, newTask);
     }
 
-    // 3. Persist to API / SQLite
+    // 3. Persist to API / Database
     try {
       await fetch('/api/agents', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: agentId, status: newStatus, task: newTask }),
+        body: JSON.stringify({ id: agentId, status: newStatus, task: newTask, draft: newDraft }),
       });
     } catch (e) {
       console.error('Failed to persist status change', e);
@@ -135,13 +170,47 @@ export default function KantorAiPage() {
         const data = await res.json();
         if (data.agents) setAgents(data.agents);
         setIsCalibrating(false);
-        setSaveNotification('✅ Posisi karakter berhasil disimpan ke src/data/agents.json!');
+        setSaveNotification('✅ Posisi karakter berhasil disimpan!');
         setTimeout(() => setSaveNotification(null), 4000);
       }
     } catch (err) {
       console.error('Error saving positions', err);
     }
   };
+
+  // Initial loading screen while checking auth
+  if (!authChecked) {
+    return (
+      <main
+        style={{
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#0b1530',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 16,
+          color: '#38bdf8',
+        }}
+      >
+        <Loader2 size={36} className="animate-spin" />
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#94a3b8' }}>Memuat Kantor AI...</span>
+      </main>
+    );
+  }
+
+  // Password Login Modal Gate
+  if (isAuthRequired && !isAuthenticated) {
+    return (
+      <LoginModal
+        onSuccess={() => {
+          setIsAuthenticated(true);
+          fetchAgents();
+        }}
+      />
+    );
+  }
 
   return (
     <main
@@ -164,6 +233,8 @@ export default function KantorAiPage() {
         onZoomOut={() => sceneRef.current?.zoomOut()}
         onResetCamera={() => sceneRef.current?.resetCamera()}
         onSelectAgent={(agent) => handleFocusAgent(agent.id)}
+        isAuthEnabled={isAuthRequired}
+        onLogout={handleLogout}
       />
 
       {/* Mode Kalibrasi Banner */}
