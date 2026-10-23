@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const token = process.env.TELEGRAM_BOT_TOKEN || '';
   const allowedChatId = process.env.TELEGRAM_CHAT_ID || '';
-  const appUrl = (process.env.APP_URL || 'https://ai-office-elfonda256.vercel.app').replace(/\/$/, '');
+  const appUrl = (process.env.APP_URL || 'https://ai-office-arkaprana.vercel.app').replace(/\/$/, '');
 
   try {
     const body = await request.json();

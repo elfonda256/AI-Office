@@ -55,6 +55,11 @@ export async function POST(request: Request) {
       task
     );
 
+    // Deteksi otomatis URL domain website yang sedang dibuka pengguna di browser
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    const requestOrigin = host ? `${proto}://${host}` : undefined;
+
     if (!result.success) {
       // Revert to 'santai' or previous state with error
       await updateAgentStatusAndTask(
@@ -68,7 +73,8 @@ export async function POST(request: Request) {
       // Kirim notifikasi kegagalan ke Telegram (contoh: "🔴 Pompom gagal: Batas kuota...")
       notifyAgentTaskFailed(
         { id, name: agent.name, task },
-        result.error || 'Terjadi kesalahan sistem'
+        result.error || 'Terjadi kesalahan sistem',
+        requestOrigin
       ).catch((e) => console.error('[Telegram] Notifikasi error gagal dikirim:', e));
 
       return NextResponse.json({ error: result.error, model: result.model }, { status: 500 });
@@ -83,13 +89,16 @@ export async function POST(request: Request) {
       `Draf selesai disusun dengan ${result.model}. Menunggu persetujuan.`
     );
 
-    // Kirim notifikasi draf siap ke Telegram (contoh: "🟡 Jojo selesai: Laporan iklan mingguan...")
-    notifyAgentDraftReady({
-      id,
-      name: agent.name,
-      task,
-      draftSnippet: result.draft,
-    }).catch((e) => console.error('[Telegram] Notifikasi draft gagal dikirim:', e));
+    // Kirim notifikasi draf siap ke Telegram dengan URL yang akurat otomatis
+    notifyAgentDraftReady(
+      {
+        id,
+        name: agent.name,
+        task,
+        draftSnippet: result.draft,
+      },
+      requestOrigin
+    ).catch((e) => console.error('[Telegram] Notifikasi draft gagal dikirim:', e));
 
     const updatedAgents = await getAllAgents();
     const updatedAgent = updatedAgents.find((a) => a.id === id);

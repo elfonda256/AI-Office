@@ -1,10 +1,24 @@
 const TELEGRAM_API = 'https://api.telegram.org';
 
-function getTelegramConfig() {
+function getTelegramConfig(overrideUrl?: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN || '';
   const chatId = process.env.TELEGRAM_CHAT_ID || '';
-  const appUrl = (process.env.APP_URL || 'https://ai-office-elfonda256.vercel.app').replace(/\/$/, '');
-  return { token, chatId, appUrl };
+
+  let appUrl = overrideUrl || process.env.APP_URL;
+
+  if (!appUrl || appUrl.includes('ai-office-elfonda256.vercel.app')) {
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      appUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    } else {
+      appUrl = 'https://ai-office-arkaprana.vercel.app';
+    }
+  }
+
+  if (!appUrl.startsWith('http://') && !appUrl.startsWith('https://')) {
+    appUrl = `https://${appUrl}`;
+  }
+
+  return { token, chatId, appUrl: appUrl.replace(/\/$/, '') };
 }
 
 // In-memory anti-spam cache: 1 notification per agent status transition within 30s
@@ -64,18 +78,21 @@ export async function sendTelegramMessage(text: string, replyMarkup?: any): Prom
  * Notifies when agent completes a draft and transitions to "waiting" (nunggu)
  * Contoh: "🟡 Jojo selesai: Laporan iklan mingguan. Draf siap kamu cek."
  */
-export async function notifyAgentDraftReady(agent: {
-  id: string;
-  name: string;
-  task: string;
-  draftSnippet?: string;
-}): Promise<boolean> {
+export async function notifyAgentDraftReady(
+  agent: {
+    id: string;
+    name: string;
+    task: string;
+    draftSnippet?: string;
+  },
+  overrideAppUrl?: string
+): Promise<boolean> {
   if (isDuplicateNotification(agent.id, 'nunggu', agent.task)) {
     console.log(`[Telegram] Lewati notifikasi duplikat untuk ${agent.name}`);
     return false;
   }
 
-  const { appUrl } = getTelegramConfig();
+  const { appUrl } = getTelegramConfig(overrideAppUrl);
 
   // Escape HTML characters in task string for safe HTML rendering
   const safeTask = agent.task
@@ -113,16 +130,20 @@ export async function notifyAgentDraftReady(agent: {
  * Notifies when an agent task fails (e.g. API quota or network error)
  * Contoh: "🔴 Pompom gagal: Batas kuota Gemini tercapai."
  */
-export async function notifyAgentTaskFailed(agent: {
-  id: string;
-  name: string;
-  task: string;
-}, reason: string): Promise<boolean> {
+export async function notifyAgentTaskFailed(
+  agent: {
+    id: string;
+    name: string;
+    task: string;
+  },
+  reason: string,
+  overrideAppUrl?: string
+): Promise<boolean> {
   if (isDuplicateNotification(agent.id, 'gagal', reason)) {
     return false;
   }
 
-  const { appUrl } = getTelegramConfig();
+  const { appUrl } = getTelegramConfig(overrideAppUrl);
 
   const safeReason = reason
     .replace(/&/g, '&amp;')
