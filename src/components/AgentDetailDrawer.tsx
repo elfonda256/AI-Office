@@ -19,6 +19,7 @@ import {
   Copy,
   Check,
   Loader2,
+  RefreshCw,
 } from 'lucide-react';
 
 interface AgentDetailDrawerProps {
@@ -81,6 +82,31 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
       setIsLoadingAi(false);
     }
   };
+
+  const handleRetryTask = async () => {
+    if (!agent || isLoadingAi) return;
+    setIsLoadingAi(true);
+
+    try {
+      if (onAssignAiTask) {
+        await onAssignAiTask(agent.id, agent.task);
+      } else {
+        await fetch('/api/agents/task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: agent.id, task: agent.task }),
+        });
+      }
+    } catch (err) {
+      console.error('Failed to retry task', err);
+    } finally {
+      setIsLoadingAi(false);
+    }
+  };
+
+  const latestFailureNote = agent.recentActivity?.[0]?.toLowerCase().includes('gagal')
+    ? agent.recentActivity[0]
+    : null;
 
   const handleApproveDecision = () => {
     // Decision approved: switch agent from 'nunggu' to 'kerja', keeping clean task instruction and clearing draft
@@ -505,6 +531,70 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
               </div>
             </form>
           </div>
+
+          {/* Banner Error & Tombol Coba Lagi */}
+          {latestFailureNote && agent.status !== 'kerja' && (
+            <div
+              style={{
+                padding: '14px 16px',
+                borderRadius: 14,
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                boxShadow: '0 4px 16px rgba(239, 68, 68, 0.15)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <AlertCircle size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fca5a5' }}>
+                    Tugas Mengalami Kendala
+                  </div>
+                  <p style={{ fontSize: 12, color: '#f1f5f9', marginTop: 3, lineHeight: 1.45 }}>
+                    {latestFailureNote.replace(/^Gagal memproses tugas:\s*/i, '')}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleRetryTask}
+                disabled={isLoadingAi}
+                style={{
+                  width: '100%',
+                  marginTop: 2,
+                  padding: '9px 14px',
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: isLoadingAi ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 7,
+                  boxShadow: '0 2px 10px rgba(239, 68, 68, 0.35)',
+                  transition: 'opacity 0.2s',
+                  opacity: isLoadingAi ? 0.7 : 1,
+                }}
+              >
+                {isLoadingAi ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Mencoba Ulang dengan Model Cadangan...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={14} />
+                    <span>Coba Lagi Tugas Ini</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Current Task Card - Shows Pure Original User Instruction */}
           <div
