@@ -7,6 +7,7 @@ import { Agent, AgentStatus } from '../types/agent';
 export interface OfficeSceneHandle {
   updateAgentStatus: (agentId: string, newStatus: AgentStatus, newTask?: string) => void;
   focusAgent: (agentId: string) => void;
+  selectAgent: (agentId: string | null) => void;
   setCalibrationMode: (active: boolean) => void;
   resetCamera: () => void;
   zoomIn: () => void;
@@ -49,6 +50,8 @@ interface AgentContainerObj {
   actionTween?: Phaser.Tweens.Tween;
   dotPulseTween?: Phaser.Tweens.Tween;
   exclamationTween?: Phaser.Tweens.Tween;
+  bubbleDismissTimer?: Phaser.Time.TimerEvent;
+  isBubbleTemporarilyVisible?: boolean;
 }
 
 class PhaserOfficeScene extends Phaser.Scene {
@@ -347,6 +350,7 @@ class PhaserOfficeScene extends Phaser.Scene {
         currentBubbleX: 0,
         bubbleWidth: 90,
         bubbleHeight: 24,
+        isBubbleTemporarilyVisible: false,
       };
 
       this.agentMap.set(agent.id, agentObj);
@@ -446,15 +450,32 @@ class PhaserOfficeScene extends Phaser.Scene {
     labelBg.fillRoundedRect(-12, -pillH / 2, pillW, pillH, 9);
     labelBg.strokeRoundedRect(-12, -pillH / 2, pillW, pillH, 9);
 
+    const isMobile = (typeof window !== 'undefined' && window.innerWidth <= 768) || this.scale.width <= 768;
+
+    // Mobile anti-clutter: don't keep persistent popups staying on screen!
+    // On mobile screens, show bubble ONLY when hovered, selected, or during a temporary notification burst
+    const shouldShowBubble = (agent.status !== 'santai') && (
+      !isMobile || isHovered || isSelected || Boolean(obj.isBubbleTemporarilyVisible)
+    );
+
     // Speech bubble logic with auto-shortening and full expansion on hover
-    if (agent.status === 'santai') {
-      this.tweens.add({
-        targets: bubbleContainer,
-        scale: 0,
-        alpha: 0,
-        duration: 180,
-        ease: 'Sine.easeIn',
-      });
+    if (!shouldShowBubble) {
+      if (bubbleContainer.visible && bubbleContainer.alpha > 0) {
+        this.tweens.add({
+          targets: bubbleContainer,
+          scale: 0,
+          alpha: 0,
+          duration: 180,
+          ease: 'Sine.easeIn',
+          onComplete: () => {
+            bubbleContainer.setVisible(false);
+          },
+        });
+      } else {
+        bubbleContainer.setVisible(false);
+        bubbleContainer.setAlpha(0);
+        bubbleContainer.setScale(0);
+      }
       obj.bubbleWidth = 0;
       obj.bubbleHeight = 0;
     } else {
@@ -507,7 +528,7 @@ class PhaserOfficeScene extends Phaser.Scene {
   private resolveBubbleCollisions() {
     const activeObjects: AgentContainerObj[] = [];
     this.agentMap.forEach((obj) => {
-      if (obj.agent.status !== 'santai' && obj.bubbleWidth > 0) {
+      if (obj.agent.status !== 'santai' && obj.bubbleWidth > 0 && obj.bubbleContainer.visible && obj.bubbleContainer.alpha > 0.05) {
         activeObjects.push(obj);
       }
     });
@@ -685,6 +706,21 @@ class PhaserOfficeScene extends Phaser.Scene {
     });
   }
 
+  public triggerTemporaryBubble(obj: AgentContainerObj, durationMs: number = 4500) {
+    if (obj.bubbleDismissTimer) {
+      obj.bubbleDismissTimer.remove(false);
+    }
+    obj.isBubbleTemporarilyVisible = true;
+    this.updateAgentVisuals(obj);
+    this.resolveBubbleCollisions();
+
+    obj.bubbleDismissTimer = this.time.delayedCall(durationMs, () => {
+      obj.isBubbleTemporarilyVisible = false;
+      this.updateAgentVisuals(obj);
+      this.resolveBubbleCollisions();
+    });
+  }
+
   public updateAgentStatus(agentId: string, newStatus: AgentStatus, newTask?: string) {
     const obj = this.agentMap.get(agentId);
     if (!obj) return;
@@ -702,9 +738,13 @@ class PhaserOfficeScene extends Phaser.Scene {
     } else if (newStatus !== 'santai' && oldStatus === 'santai') {
       // Kembali dari santai ke meja kerja
       this.moveAgent(agentId, obj.agent.x, obj.agent.y);
+      this.triggerTemporaryBubble(obj, 4500);
     } else {
       this.updateAgentVisuals(obj);
       this.resolveBubbleCollisions();
+      if (newStatus !== 'santai') {
+        this.triggerTemporaryBubble(obj, 4500);
+      }
     }
   }
 
@@ -811,9 +851,24 @@ class PhaserOfficeScene extends Phaser.Scene {
     this.cameras.main.zoomTo(newZoom, 200);
   }
 
+  public selectAgent(agentId: string | null) {
+    const prevId = this.selectedAgentId;
+    this.selectedAgentId = agentId;
+    if (prevId && prevId !== agentId) {
+      const prevObj = this.agentMap.get(prevId);
+      if (prevObj) this.updateAgentVisuals(prevObj);
+    }
+    if (agentId) {
+      const newObj = this.agentMap.get(agentId);
+      if (newObj) this.updateAgentVisuals(newObj);
+    }
+    this.resolveBubbleCollisions();
+  }
+
   public focusAgent(agentId: string) {
     const obj = this.agentMap.get(agentId);
     if (!obj) return;
+    this.selectAgent(agentId);
     this.cameras.main.pan(obj.container.x, obj.container.y - 25, 500, 'Sine.easeInOut');
     this.cameras.main.zoomTo(1.35, 500, 'Sine.easeInOut');
   }
@@ -845,6 +900,11 @@ export const OfficeScene = forwardRef<OfficeSceneHandle, OfficeSceneProps>(
       focusAgent: (agentId: string) => {
         if (sceneRef.current) {
           sceneRef.current.focusAgent(agentId);
+        }
+      },
+      selectAgent: (agentId: string | null) => {
+        if (sceneRef.current) {
+          sceneRef.current.selectAgent(agentId);
         }
       },
       setCalibrationMode: (active: boolean) => {

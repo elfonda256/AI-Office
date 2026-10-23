@@ -201,7 +201,7 @@ export default function KantorAiPage() {
       <main
         style={{
           width: '100vw',
-          height: '100vh',
+          height: '100dvh',
           backgroundColor: '#0b1530',
           display: 'flex',
           flexDirection: 'column',
@@ -234,7 +234,7 @@ export default function KantorAiPage() {
       style={{
         position: 'relative',
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         backgroundColor: '#0b1530',
         overflow: 'hidden',
       }}
@@ -331,36 +331,37 @@ export default function KantorAiPage() {
       <div
         style={{
           position: 'absolute',
-          bottom: 18,
+          bottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 10,
+          gap: 8,
           pointerEvents: 'none',
           zIndex: 35,
-          maxWidth: '94vw',
+          maxWidth: '96vw',
         }}
       >
         <div
-          className="glass-panel"
+          className="glass-panel no-scrollbar"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '8px 14px',
+            gap: 6,
+            padding: '6px 10px',
             borderRadius: 999,
             pointerEvents: 'auto',
             overflowX: 'auto',
             maxWidth: '100%',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {agents.map((ag) => {
             const isSelected = selectedAgent?.id === ag.id;
             const dotColor =
               ag.status === 'kerja'
-                ? 'var(--color-kerja)'
+                 ? 'var(--color-kerja)'
                 : ag.status === 'nunggu'
                 ? 'var(--color-nunggu)'
                 : 'var(--color-santai)';
@@ -373,8 +374,8 @@ export default function KantorAiPage() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 7,
-                  padding: '5px 12px',
+                  gap: 6,
+                  padding: '4px 10px',
                   borderRadius: 999,
                   background: isSelected
                     ? 'rgba(59, 130, 246, 0.28)'
@@ -383,17 +384,18 @@ export default function KantorAiPage() {
                     ? '1.5px solid #3b82f6'
                     : '1px solid rgba(255, 255, 255, 0.08)',
                   color: isSelected ? '#ffffff' : '#cbd5e1',
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s',
+                  flexShrink: 0,
                 }}
               >
                 <span
                   style={{
-                    width: 8,
-                    height: 8,
+                    width: 7,
+                    height: 7,
                     borderRadius: '50%',
                     backgroundColor: dotColor,
                     display: 'inline-block',
@@ -406,8 +408,9 @@ export default function KantorAiPage() {
           })}
         </div>
 
-        {/* User Interaction hint */}
+        {/* User Interaction hint - Only shown on desktop, hidden on mobile */}
         <div
+          className="mobile-hide"
           style={{
             fontSize: 11,
             color: 'var(--text-muted)',
@@ -416,6 +419,7 @@ export default function KantorAiPage() {
             padding: '4px 14px',
             borderRadius: 999,
             border: '1px solid rgba(255, 255, 255, 0.06)',
+            whiteSpace: 'nowrap',
           }}
         >
           💡 <strong>Drag</strong> untuk geser &bull; <strong>Scroll / Pinch</strong> untuk zoom &bull;{' '}
@@ -426,7 +430,10 @@ export default function KantorAiPage() {
       {/* Slide-in Agent Detail Drawer */}
       <AgentDetailDrawer
         agent={selectedAgent}
-        onClose={() => setSelectedAgent(null)}
+        onClose={() => {
+          setSelectedAgent(null);
+          sceneRef.current?.selectAgent(null);
+        }}
         onUpdateStatus={handleUpdateStatus}
         onFocusAgent={handleFocusAgent}
         onAssignAiTask={handleAssignAiTask}

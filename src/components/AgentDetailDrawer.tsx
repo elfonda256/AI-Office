@@ -147,14 +147,12 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
 
       {/* Slide-In Drawer from Right */}
       <aside
-        className="glass-panel"
+        className="glass-panel agent-drawer"
         style={{
           position: 'fixed',
           top: 0,
           right: 0,
           bottom: 0,
-          width: 460,
-          maxWidth: '95vw',
           zIndex: 50,
           background: 'linear-gradient(180deg, #0e1a3b 0%, #091228 100%)',
           borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
@@ -164,19 +162,21 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
           transform: agent ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           overflowY: 'auto',
+          overscrollBehavior: 'contain',
         }}
       >
         {/* Header */}
         <div
           style={{
-            padding: '18px 22px',
+            padding: '16px 20px',
+            paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))',
             borderBottom: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             position: 'sticky',
             top: 0,
-            background: 'inherit',
+            background: '#0e1a3b',
             zIndex: 10,
           }}
         >
@@ -223,7 +223,7 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
                       border: '1px solid rgba(56, 189, 248, 0.3)',
                     }}
                   >
-                    KAMU
+                    Kamu
                   </span>
                 )}
               </div>
@@ -235,26 +235,36 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
 
           <button
             onClick={onClose}
+            aria-label="Tutup panel"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'rgba(255, 255, 255, 0.08)',
               border: 'none',
               borderRadius: 8,
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#94a3b8',
               cursor: 'pointer',
               transition: 'background 0.2s',
+              touchAction: 'manipulation',
             }}
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Content Body */}
-        <div style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div
+          style={{
+            padding: '20px',
+            paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20,
+          }}
+        >
           {/* Quick Focus Button */}
           <button
             onClick={() => onFocusAgent(agent.id)}
@@ -488,7 +498,7 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
                   background: 'rgba(0, 0, 0, 0.35)',
                   border: '1px solid rgba(56, 189, 248, 0.3)',
                   color: '#f8fafc',
-                  fontSize: 12.5,
+                  fontSize: 16,
                   fontFamily: 'inherit',
                   outline: 'none',
                   resize: 'none',
@@ -661,7 +671,7 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
                     background: 'rgba(0, 0, 0, 0.3)',
                     border: '1px solid rgba(56, 189, 248, 0.4)',
                     color: '#f8fafc',
-                    fontSize: 13,
+                    fontSize: 16,
                     fontFamily: 'inherit',
                     outline: 'none',
                   }}
