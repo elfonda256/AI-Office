@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg-primary: #0b1530;
+  --bg-secondary: #0f1c3f;
+  --bg-card: rgba(15, 28, 63, 0.85);
+  --bg-card-hover: rgba(23, 41, 88, 0.95);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(96, 165, 250, 0.3);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --color-kerja: #10b981;
+  --color-kerja-glow: rgba(16, 185, 129, 0.35);
+  --color-nunggu: #f59e0b;
+  --color-nunggu-glow: rgba(245, 158, 11, 0.35);
+  --color-santai: #38bdf8;
+  --color-santai-glow: rgba(56, 189, 248, 0.35);
+
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* Ensure pixel art displays razor sharp in canvas */
+canvas {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.glass-panel-hover:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-highlight);
+}
+
+/* Status indicator pulses */
+@keyframes pulseGlowGreen {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-kerja-glow); }
+  50% { box-shadow: 0 0 12px 3px var(--color-kerja-glow); }
+}
+
+@keyframes pulseGlowYellow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-nunggu-glow); transform: scale(1); }
+  50% { box-shadow: 0 0 14px 4px var(--color-nunggu-glow); transform: scale(1.08); }
+}
+
+@keyframes pulseGlowBlue {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-santai-glow); }
+  50% { box-shadow: 0 0 10px 2px var(--color-santai-glow); }
+}
+
+.pulse-green {
+  animation: pulseGlowGreen 2s infinite ease-in-out;
+}
+
+.pulse-yellow {
+  animation: pulseGlowYellow 1.5s infinite ease-in-out;
+}
+
+.pulse-blue {
+  animation: pulseGlowBlue 2.5s infinite ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 21, 48, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
