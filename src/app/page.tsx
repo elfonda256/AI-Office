@@ -70,6 +70,23 @@ export default function KantorAiPage() {
     }
   }, [agents, selectedAgent]);
 
+  // Handle direct link from Telegram notification: ?agent=jojo
+  useEffect(() => {
+    if (typeof window !== 'undefined' && agents.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const targetAgentId = params.get('agent');
+      if (targetAgentId) {
+        const found = agents.find((a) => a.id.toLowerCase() === targetAgentId.toLowerCase());
+        if (found) {
+          setSelectedAgent(found);
+          setTimeout(() => {
+            sceneRef.current?.focusAgent(found.id);
+          }, 800);
+        }
+      }
+    }
+  }, [agents]);
+
   // Handle logout
   const handleLogout = async () => {
     try {
