@@ -6,6 +6,7 @@ import { Agent, AgentStatus } from '../types/agent';
 
 export interface OfficeSceneHandle {
   updateAgentStatus: (agentId: string, newStatus: AgentStatus, newTask?: string) => void;
+  syncAgents?: (agents: Agent[]) => void;
   focusAgent: (agentId: string) => void;
   selectAgent: (agentId: string | null) => void;
   setCalibrationMode: (active: boolean) => void;
@@ -721,6 +722,46 @@ class PhaserOfficeScene extends Phaser.Scene {
     });
   }
 
+  public syncAgents(updatedAgents: Agent[]) {
+    if (!this.agentMap || this.agentMap.size === 0) return;
+
+    for (const updated of updatedAgents) {
+      const obj = this.agentMap.get(updated.id);
+      if (!obj) continue;
+
+      const oldStatus = obj.agent.status;
+      const oldTask = obj.agent.task;
+      const oldDraft = obj.agent.draft;
+
+      const statusChanged = oldStatus !== updated.status;
+      const taskChanged = oldTask !== updated.task;
+      const draftChanged = oldDraft !== updated.draft;
+
+      if (statusChanged || taskChanged || draftChanged) {
+        obj.agent.status = updated.status;
+        obj.agent.task = updated.task;
+        obj.agent.draft = updated.draft;
+
+        this.updateAgentVisuals(obj);
+
+        if (updated.status === 'santai' && oldStatus !== 'santai') {
+          const spot = obj.agent.chillSpot || { x: 460, y: 530 };
+          this.moveAgent(updated.id, spot.x, spot.y, () => {
+            obj.sprite.setFrame(24);
+          });
+        } else if (updated.status !== 'santai' && oldStatus === 'santai') {
+          this.moveAgent(updated.id, obj.agent.x, obj.agent.y);
+          this.triggerTemporaryBubble(obj, 4500);
+        } else if (statusChanged || taskChanged) {
+          if (updated.status !== 'santai') {
+            this.triggerTemporaryBubble(obj, 4500);
+          }
+        }
+      }
+    }
+    this.resolveBubbleCollisions();
+  }
+
   public updateAgentStatus(agentId: string, newStatus: AgentStatus, newTask?: string) {
     const obj = this.agentMap.get(agentId);
     if (!obj) return;
@@ -728,6 +769,8 @@ class PhaserOfficeScene extends Phaser.Scene {
     const oldStatus = obj.agent.status;
     obj.agent.status = newStatus;
     if (newTask) obj.agent.task = newTask;
+
+    this.updateAgentVisuals(obj);
 
     if (newStatus === 'santai' && oldStatus !== 'santai') {
       // Biru: Berjalan ke chill spot (lounge / game room / cafe), lalu sitting
@@ -740,7 +783,6 @@ class PhaserOfficeScene extends Phaser.Scene {
       this.moveAgent(agentId, obj.agent.x, obj.agent.y);
       this.triggerTemporaryBubble(obj, 4500);
     } else {
-      this.updateAgentVisuals(obj);
       this.resolveBubbleCollisions();
       if (newStatus !== 'santai') {
         this.triggerTemporaryBubble(obj, 4500);
@@ -897,6 +939,11 @@ export const OfficeScene = forwardRef<OfficeSceneHandle, OfficeSceneProps>(
           sceneRef.current.updateAgentStatus(agentId, newStatus, newTask);
         }
       },
+      syncAgents: (updatedAgents: Agent[]) => {
+        if (sceneRef.current) {
+          sceneRef.current.syncAgents(updatedAgents);
+        }
+      },
       focusAgent: (agentId: string) => {
         if (sceneRef.current) {
           sceneRef.current.focusAgent(agentId);
@@ -1002,6 +1049,13 @@ export const OfficeScene = forwardRef<OfficeSceneHandle, OfficeSceneProps>(
         sceneRef.current.setCalibrationMode(isCalibrating);
       }
     }, [isCalibrating]);
+
+    // Reactive sync: When agents prop updates from API polling or approvals, sync to Phaser canvas!
+    useEffect(() => {
+      if (sceneRef.current && agents && agents.length > 0) {
+        sceneRef.current.syncAgents(agents);
+      }
+    }, [agents]);
 
     return (
       <div

@@ -154,7 +154,7 @@ export async function updateAgentStatusAndTask(
   id: string,
   status: 'kerja' | 'nunggu' | 'santai',
   task?: string,
-  draft?: string,
+  draft?: string | null,
   activityNote?: string
 ): Promise<void> {
   await ensureDbInitialized();
@@ -181,14 +181,18 @@ export async function updateAgentStatusAndTask(
 
   const activitiesJson = JSON.stringify(activities);
 
-  if (draft !== undefined) {
+  // If draft is explicitly null/empty or status is 'santai', clear draft in DB
+  const shouldClearDraft = draft === null || draft === '' || (status === 'santai' && draft === undefined);
+  const finalDraft = shouldClearDraft ? null : (draft !== undefined ? draft : undefined);
+
+  if (finalDraft !== undefined) {
     await client.execute({
       sql: `
         UPDATE agents 
         SET status = ?, task = COALESCE(?, task), draft = ?, recent_activity = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ?
       `,
-      args: [status, task || null, draft, activitiesJson, id],
+      args: [status, task || null, finalDraft, activitiesJson, id],
     });
   } else if (task) {
     await client.execute({

@@ -35,7 +35,10 @@ export default function KantorAiPage() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && Array.isArray(data) && data.length > 0) {
-          setAgents(data);
+          setAgents((prev) => {
+            const isDifferent = JSON.stringify(prev) !== JSON.stringify(data);
+            return isDifferent ? data : prev;
+          });
         }
       })
       .catch((err) => console.log('Using initial agents data', err));
@@ -62,11 +65,43 @@ export default function KantorAiPage() {
       });
   }, []);
 
+  // Periodic polling & Window focus sync so approvals from Telegram or other devices instantly reflect
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Polling every 3.5 seconds
+    const interval = setInterval(() => {
+      fetchAgents();
+    }, 3500);
+
+    // Refetch immediately when user returns to this tab
+    const handleFocus = () => fetchAgents();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchAgents();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [isAuthenticated]);
+
   // Update selected agent if list changes
   useEffect(() => {
     if (selectedAgent) {
       const updated = agents.find((a) => a.id === selectedAgent.id);
-      if (updated) setSelectedAgent(updated);
+      if (
+        updated &&
+        (updated.status !== selectedAgent.status ||
+          updated.draft !== selectedAgent.draft ||
+          updated.task !== selectedAgent.task)
+      ) {
+        setSelectedAgent(updated);
+      }
     }
   }, [agents, selectedAgent]);
 
@@ -96,18 +131,33 @@ export default function KantorAiPage() {
   };
 
   // Handle status update
-  const handleUpdateStatus = async (agentId: string, newStatus: AgentStatus, newTask?: string, newDraft?: string) => {
+  const handleUpdateStatus = async (
+    agentId: string,
+    newStatus: AgentStatus,
+    newTask?: string,
+    newDraft?: string | null
+  ) => {
     // 1. Optimistic UI update
     setAgents((prev) =>
       prev.map((a) => {
         if (a.id === agentId) {
+          const finalDraft =
+            newDraft !== undefined
+              ? (newDraft === null ? undefined : newDraft)
+              : (newStatus === 'santai' ? undefined : a.draft);
+
+          const activityText =
+            newStatus === 'santai' && a.status === 'nunggu'
+              ? `Tugas disetujui & selesai: ${newTask || a.task}`
+              : `Status diubah ke ${newStatus.toUpperCase()}: ${newTask || a.task}`;
+
           return {
             ...a,
             status: newStatus,
             task: newTask || a.task,
-            draft: newDraft !== undefined ? newDraft : a.draft,
+            draft: finalDraft,
             recentActivity: [
-              `Status diubah ke ${newStatus.toUpperCase()}: ${newTask || a.task}`,
+              activityText,
               ...a.recentActivity.slice(0, 4),
             ],
           };
@@ -126,7 +176,12 @@ export default function KantorAiPage() {
       await fetch('/api/agents', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: agentId, status: newStatus, task: newTask, draft: newDraft }),
+        body: JSON.stringify({
+          id: agentId,
+          status: newStatus,
+          task: newTask,
+          draft: newDraft !== undefined ? newDraft : (newStatus === 'santai' ? null : undefined),
+        }),
       });
     } catch (e) {
       console.error('Failed to persist status change', e);

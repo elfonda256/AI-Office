@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getAllAgents, updateAgentStatusAndTask } from '@/lib/db';
-import { setupWebhook } from '@/lib/telegram';
+import { setupWebhook, sendTelegramMessage } from '@/lib/telegram';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 const TELEGRAM_API = 'https://api.telegram.org';
 
-// GET: Check status or auto-setup webhook if ?setup=1
+// GET: Check status, auto-setup webhook if ?setup=1, or send test notification if ?test=1
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
@@ -16,9 +16,42 @@ export async function GET(request: Request) {
     return NextResponse.json(result);
   }
 
+  if (searchParams.get('test') === '1') {
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    const requestOrigin = host ? `${proto}://${host}` : undefined;
+
+    const success = await sendTelegramMessage(
+      '🔔 <b>Tes Notifikasi Kantor AI</b>\n\nKoneksi Telegram server berhasil terhubung!',
+      {
+        inline_keyboard: [
+          [
+            {
+              text: '🏢 Buka Kantor AI',
+              url: requestOrigin || 'https://ai-office-arkaprana.vercel.app',
+            },
+          ],
+        ],
+      }
+    );
+
+    return NextResponse.json({
+      success,
+      message: success
+        ? 'Notifikasi tes berhasil terkirim ke akun Telegram kamu!'
+        : 'Gagal mengirim pesan ke Telegram. Pastikan TELEGRAM_BOT_TOKEN dan TELEGRAM_CHAT_ID sudah disetel di environment variables.',
+    });
+  }
+
+  const token = process.env.TELEGRAM_BOT_TOKEN || '';
+  const chatId = process.env.TELEGRAM_CHAT_ID || '';
+
   return NextResponse.json({
     status: 'active',
     service: 'Kantor AI Telegram Webhook',
+    configured: Boolean(token && chatId),
+    hasToken: Boolean(token),
+    hasChatId: Boolean(chatId),
     timestamp: new Date().toISOString(),
   });
 }
@@ -60,13 +93,13 @@ export async function POST(request: Request) {
         const agent = allAgents.find((a) => a.id === agentId);
 
         if (agent) {
-          // Update status agen ke 'kerja', hapus draft, catat aktivitas
+          // Update status agen ke 'santai' (tugas selesai & disetujui), hapus draft, catat aktivitas
           await updateAgentStatusAndTask(
             agentId,
-            'kerja',
+            'santai',
             agent.task,
-            undefined,
-            'Draf disetujui Bos Elfano via Telegram'
+            null,
+            'Draf disetujui Bos Elfano via Telegram (Tugas Selesai)'
           );
 
           // 1. Popup umpan balik di Telegram
@@ -75,7 +108,7 @@ export async function POST(request: Request) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               callback_query_id: cb.id,
-              text: `✅ Draf ${agent.name} berhasil disetujui!`,
+              text: `✅ Draf ${agent.name} berhasil disetujui! Tugas selesai.`,
             }),
           });
 
@@ -91,7 +124,7 @@ export async function POST(request: Request) {
             body: JSON.stringify({
               chat_id: cb.message?.chat?.id || allowedChatId,
               message_id: cb.message?.message_id,
-              text: `✅ <b>${agent.name} Disetujui:</b>\n"${safeTask}"\n\nDraf telah disetujui oleh Bos Elfano via Telegram. Agen kembali bekerja!`,
+              text: `✅ <b>${agent.name} Selesai & Disetujui:</b>\n"${safeTask}"\n\nDraf telah disetujui oleh Bos Elfano via Telegram. Tugas telah selesai!`,
               parse_mode: 'HTML',
               reply_markup: {
                 inline_keyboard: [

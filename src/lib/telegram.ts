@@ -1,12 +1,19 @@
 const TELEGRAM_API = 'https://api.telegram.org';
 
-function getTelegramConfig(overrideUrl?: string) {
+export function getTelegramConfig(overrideUrl?: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN || '';
   const chatId = process.env.TELEGRAM_CHAT_ID || '';
 
-  let appUrl = overrideUrl || process.env.APP_URL;
+  let appUrl = overrideUrl || process.env.APP_URL || '';
 
-  if (!appUrl || appUrl.includes('ai-office-elfonda256.vercel.app')) {
+  // Telegram Bot API strictly forbids 'localhost', '127.0.0.1', or invalid HTTP in inline keyboard button URLs!
+  const isLocalOrInvalid =
+    !appUrl ||
+    appUrl.includes('localhost') ||
+    appUrl.includes('127.0.0.1') ||
+    appUrl.includes('ai-office-elfonda256.vercel.app');
+
+  if (isLocalOrInvalid) {
     if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
       appUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
     } else {
@@ -36,16 +43,32 @@ function isDuplicateNotification(agentId: string, status: string, task: string):
   return false;
 }
 
+function sanitizeReplyMarkup(markup: any, fallbackDomain: string = 'https://ai-office-arkaprana.vercel.app') {
+  if (!markup) return markup;
+  try {
+    const jsonStr = JSON.stringify(markup);
+    const sanitizedStr = jsonStr
+      .replace(/http:\/\/localhost:\d+/g, fallbackDomain)
+      .replace(/http:\/\/127\.0\.0\.1:\d+/g, fallbackDomain)
+      .replace(/http:\/\/localhost/g, fallbackDomain);
+    return JSON.parse(sanitizedStr);
+  } catch {
+    return markup;
+  }
+}
+
 /**
  * Sends a message to the user's Telegram chat
  */
 export async function sendTelegramMessage(text: string, replyMarkup?: any): Promise<boolean> {
-  const { token, chatId } = getTelegramConfig();
+  const { token, chatId, appUrl } = getTelegramConfig();
 
   if (!token || !chatId) {
     console.log('[Telegram] Bot token atau Chat ID belum disetel, lewati notifikasi.');
     return false;
   }
+
+  const cleanMarkup = replyMarkup ? sanitizeReplyMarkup(replyMarkup, appUrl) : undefined;
 
   try {
     const url = `${TELEGRAM_API}/bot${token}/sendMessage`;
@@ -57,7 +80,7 @@ export async function sendTelegramMessage(text: string, replyMarkup?: any): Prom
         chat_id: chatId,
         text,
         parse_mode: 'HTML',
-        reply_markup: replyMarkup,
+        reply_markup: cleanMarkup,
       }),
     });
 

@@ -25,7 +25,7 @@ import {
 interface AgentDetailDrawerProps {
   agent: Agent | null;
   onClose: () => void;
-  onUpdateStatus: (agentId: string, newStatus: AgentStatus, newTask?: string, newDraft?: string) => void;
+  onUpdateStatus: (agentId: string, newStatus: AgentStatus, newTask?: string, newDraft?: string | null) => void;
   onFocusAgent: (agentId: string) => void;
   onAssignAiTask?: (agentId: string, task: string) => Promise<void>;
 }
@@ -46,7 +46,11 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
   if (!agent) return null;
 
   const handleStatusChange = (newStatus: AgentStatus) => {
-    onUpdateStatus(agent.id, newStatus);
+    if (newStatus === 'santai' && agent.draft) {
+      onUpdateStatus(agent.id, newStatus, agent.task, null);
+    } else {
+      onUpdateStatus(agent.id, newStatus);
+    }
   };
 
   const handleTaskSubmit = (e: React.FormEvent) => {
@@ -109,13 +113,22 @@ export const AgentDetailDrawer: React.FC<AgentDetailDrawerProps> = ({
     : null;
 
   const handleApproveDecision = () => {
-    // Decision approved: switch agent from 'nunggu' to 'kerja', keeping clean task instruction and clearing draft
-    onUpdateStatus(
-      agent.id,
-      'kerja',
-      agent.task,
-      undefined
-    );
+    // Draf disetujui: tugas selesai, ubah status ke 'santai', bersihkan draf dan hilangkan tanda seru kuning
+    if (agent.draft) {
+      onUpdateStatus(
+        agent.id,
+        'santai',
+        agent.task,
+        null
+      );
+    } else {
+      onUpdateStatus(
+        agent.id,
+        'kerja',
+        agent.task,
+        null
+      );
+    }
   };
 
   const handleCopyDraft = () => {
